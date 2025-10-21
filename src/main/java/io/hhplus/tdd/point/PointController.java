@@ -1,7 +1,5 @@
 package io.hhplus.tdd.point;
 
-import io.hhplus.tdd.database.PointHistoryTable;
-import io.hhplus.tdd.database.UserPointTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -21,15 +19,8 @@ public class PointController {
     public UserPoint point(
             @PathVariable long id
     ) {
-        UserPointTable userPointTable = new UserPointTable();
-
-        UserPoint userPoint = userPointTable.selectById(id);
-
-        return userPoint;
-
-        // return new UserPoint(0, 0, 0);
-
-    }  // point()
+        return new UserPoint(0, 0, 0);
+    }
 
     /**
      * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
@@ -38,15 +29,8 @@ public class PointController {
     public List<PointHistory> history(
             @PathVariable long id
     ) {
-        PointHistoryTable pointHistoryTable = new PointHistoryTable();
-
-        List<PointHistory> pointHistoryList = pointHistoryTable.selectAllByUserId(id);
-
-        return pointHistoryList;
-
-        // return List.of();
-
-    } // history()
+        return List.of();
+    }
 
     /**
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
