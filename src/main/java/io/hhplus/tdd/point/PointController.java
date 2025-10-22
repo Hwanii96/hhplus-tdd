@@ -2,6 +2,7 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +57,19 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) {
+        UserPointTable userPointTable = new UserPointTable();
+
+        UserPoint userPoint = userPointTable.insertOrUpdate(id, amount);
+
+        if(userPoint != null) {
+            PointHistoryTable pointHistoryTable = new PointHistoryTable();
+
+            PointHistory pointHistory = pointHistoryTable.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
+        }
+
         return new UserPoint(0, 0, 0);
-    }
+
+    } // charge()
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
@@ -67,6 +79,18 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) {
+        UserPointTable userPointTable = new UserPointTable();
+
+        UserPoint userPoint = userPointTable.insertOrUpdate(id, amount);
+
+        if(userPoint != null) {
+            PointHistoryTable pointHistoryTable = new PointHistoryTable();
+
+            PointHistory pointHistory = pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
+        }
+
         return new UserPoint(0, 0, 0);
-    }
-}
+
+    } // use()
+
+} // PointController
