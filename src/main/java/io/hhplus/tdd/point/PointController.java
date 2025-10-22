@@ -2,7 +2,6 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
-import org.apache.catalina.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +14,12 @@ public class PointController {
 
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
 
+    private final PointService pointService;
+
+    public PointController(PointService pointService) {
+        this.pointService = pointService;
+    }
+
     /**
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
      */
@@ -22,9 +27,7 @@ public class PointController {
     public UserPoint point(
             @PathVariable long id
     ) {
-        UserPointTable userPointTable = new UserPointTable();
-
-        UserPoint userPoint = userPointTable.selectById(id);
+        UserPoint userPoint = pointService.searchPoint(id);
 
         return userPoint;
 
@@ -39,9 +42,7 @@ public class PointController {
     public List<PointHistory> history(
             @PathVariable long id
     ) {
-        PointHistoryTable pointHistoryTable = new PointHistoryTable();
-
-        List<PointHistory> pointHistoryList = pointHistoryTable.selectAllByUserId(id);
+        List<PointHistory> pointHistoryList = pointService.searchHistoriesPoint(id);
 
         return pointHistoryList;
 
@@ -57,17 +58,11 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) {
-        UserPointTable userPointTable = new UserPointTable();
+        UserPoint userPoint = pointService.chargePoint(id, amount);
 
-        UserPoint userPoint = userPointTable.insertOrUpdate(id, amount);
+        return userPoint;
 
-        if(userPoint != null) {
-            PointHistoryTable pointHistoryTable = new PointHistoryTable();
-
-            PointHistory pointHistory = pointHistoryTable.insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
-        }
-
-        return new UserPoint(0, 0, 0);
+        // return new UserPoint(0, 0, 0);
 
     } // charge()
 
@@ -79,17 +74,11 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) {
-        UserPointTable userPointTable = new UserPointTable();
+        UserPoint userPoint = pointService.usePoint(id, amount);
 
-        UserPoint userPoint = userPointTable.insertOrUpdate(id, amount);
+        return userPoint;
 
-        if(userPoint != null) {
-            PointHistoryTable pointHistoryTable = new PointHistoryTable();
-
-            PointHistory pointHistory = pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis());
-        }
-
-        return new UserPoint(0, 0, 0);
+        // return new UserPoint(0, 0, 0);
 
     } // use()
 
