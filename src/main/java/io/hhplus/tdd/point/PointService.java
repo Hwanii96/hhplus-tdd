@@ -35,9 +35,15 @@ public class PointService {
 
     public UserPoint chargePoint(long id, long amount) {
 
+        validateAmount(amount);
+
         UserPoint currentUserPoint = userPointTable.selectById(id);
 
         long curUsrPoint = currentUserPoint.point();
+
+        if(Long.MAX_VALUE < curUsrPoint + amount) {
+            throw new IllegalArgumentException("충전 후 포인트는 표현 가능한 최대값을 초과할 수 없습니다.");
+        }
 
         long updatePoint = curUsrPoint + amount;
 
@@ -51,12 +57,14 @@ public class PointService {
 
     public UserPoint usePoint(long id, long amount) {
 
+        validateAmount(amount);
+
         UserPoint currentUserPoint = userPointTable.selectById(id);
 
         long curUsrPoint = currentUserPoint.point();
 
         if(curUsrPoint <= 0L || curUsrPoint < amount) {
-            // 잔고 부족으로 인해 포인트 사용 실패
+            throw new InsufficientPointException();
         }
 
         long updatePoint = curUsrPoint - amount;
@@ -68,5 +76,12 @@ public class PointService {
         return usedUserPoint;
 
     } // usePoint()
+
+    private void validateAmount(long amount) {
+        if(amount <= 0) {
+            throw new IllegalArgumentException("금액은 0보다 커야 합니다.");
+        }
+
+    } // validateAmount()
 
 } // PointService
