@@ -10,15 +10,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 class ApiControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegal(IllegalArgumentException e) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
 
-        return ResponseEntity.status(400).body(new ErrorResponse("400", "금액이 0보다 크지 않아 충전 또는 사용이 불가능합니다."));
+        return ResponseEntity.status(400).body(new ErrorResponse("400", e.getMessage()));
     }
 
     @ExceptionHandler(value = InsufficientPointException.class)
-    public ResponseEntity<ErrorResponse> handleInsufficient(InsufficientPointException e) {
+    public ResponseEntity<ErrorResponse> handleInsufficientPointException(InsufficientPointException e) {
 
-        return ResponseEntity.status(400).body(new ErrorResponse("400", "잔고가 충분하지 않아 포인트 사용이 불가능합니다."));
+        return ResponseEntity.status(400).body(new ErrorResponse("400", e.getMessage()));
     }
 
     @ExceptionHandler(value = Exception.class)
