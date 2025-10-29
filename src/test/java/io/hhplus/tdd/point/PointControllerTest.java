@@ -1,6 +1,6 @@
 package io.hhplus.tdd.point;
 
-public class PointControllerTest {
+class PointControllerTest {
 
 /**
  * 특정 유저의 포인트 조회
