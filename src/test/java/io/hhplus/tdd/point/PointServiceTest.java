@@ -219,5 +219,24 @@ class PointServiceTest {
     /**
      * 유저가 포인트 이용 시 정상적으로 사용되는지를 검증하기 위함
      */
+    @Test
+    @DisplayName("포인트 이용 시 정상적으로 충전되는지를 검증")
+    void 포인트_이용_시_검증() {
+
+        long id = 10L;
+        long amount = 7777L;
+
+        when(userPointTable.selectById(id)).thenReturn(new UserPoint(id, 77777L, System.currentTimeMillis()));
+        when(userPointTable.insertOrUpdate(id, amount)).thenReturn(new UserPoint(id, 70000L, System.currentTimeMillis()));
+
+        UserPoint resultUserPoint = pointService.usePoint(id, amount);
+
+        assertEquals(70000L, resultUserPoint.point());
+
+        verify(userPointTable).selectById(id);
+        verify(userPointTable).insertOrUpdate(id, amount);
+        verify(pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis()));
+
+    }
 
 } // PointServiceTest
