@@ -21,6 +21,7 @@ class PointServiceTest {
     /**
      * 잘못된 형식의 유저 ID로 포인트를 조회할 때 예외처리가 정상적으로 수행되는지를 검증하기 위함
      * 이건 ControllerTest에서 수행해야할듯 ?
+     * 예외처리를 받는 쪽이 Controller 쪽 이므로 ?
      */
     /*
     @Test
@@ -138,18 +139,78 @@ class PointServiceTest {
     /**
      * 유저가 포인트 충전 시 충전 금액이 0원보다 같거나 작은 경우 충전이 되지 않는지를 검증하기 위함
      */
+    @Test
+    @DisplayName("포인트 충전 시 금액이 0원 또는 음수인 경우 예외 검증")
+    void 포인트_충전_시_금액이_0원_또는_음수인_경우() {
+
+        long id = 5L;
+        long zeroAmount = 0L;
+        long negativeNumberAmount = -1L;
+
+       IllegalArgumentException zeroException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, zeroAmount));
+       assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", zeroException.getMessage());
+
+       IllegalArgumentException negativeNumberException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, negativeNumberAmount));
+       assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", negativeNumberException.getMessage());
+
+       verifyNoInteractions(userPointTable, pointHistoryTable);
+
+    }
 
     /**
      * 유저가 포인트 충전 시 금액이 허용 가능한 금액을 초과하는 경우 충전이 되지 않는지를 검증하기 위함
      */
+    @Test
+    @DisplayName("포인트 충전 시 금액이 허용 가능한 범위를 초과한 경우 예외 검증")
+    void 포인트_충전_시_허용_가능한_금액을_초과한_경우() {
+
+        long id = 6L;
+
+    }
 
     /**
      * 유저가 포인트 충전 시 정상적으로 충전되는지를 검증하기 위함
      */
+    @Test
+    @DisplayName("포인트 충전 시 정상적으로 충전되는지를 검증")
+    void 포인트_충전_시_검증() {
+        
+        long id = 7L;
+        long amount = 77777;
+
+        when(userPointTable.selectById(id)).thenReturn(UserPoint.empty(id));
+        when(userPointTable.insertOrUpdate(id, amount)).thenReturn(new UserPoint(id, amount, System.currentTimeMillis()));
+
+        UserPoint resultUserPoint = pointService.chargePoint(id, amount);
+
+        assertEquals(amount, resultUserPoint.point());
+
+        verify(userPointTable).selectById(id);
+        verify(userPointTable).insertOrUpdate(id, amount);
+        verify(pointHistoryTable).insert(id, amount, TransactionType.CHARGE, System.currentTimeMillis());
+
+    }
 
     /**
      * 유저가 포인트 이용 시 사용 금액이 0원보다 같거나 작은 경우 이용이 되지 않는지를 검증하기 위함
      */
+    @Test
+    @DisplayName("포인트 이용 시 금액이 0원 또는 음수인 경우 예외 검증")
+    void 포인트_이용_시_금액이_0원_또는_음수인_경우() {
+
+        long id = 8L;
+        long zeroAmount = 0L;
+        long negativeNumberAmount = -1L;
+
+        IllegalArgumentException zeroException = assertThrows(IllegalArgumentException.class, () -> pointService.usePoint(id, zeroAmount));
+        assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", zeroException.getMessage());
+        
+        IllegalArgumentException negativeNumberException = assertThrows(IllegalArgumentException.class, () -> pointService.usePoint(id, negativeNumberAmount));
+        assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", negativeNumberException.getMessage());
+
+        verifyNoInteractions(userPointTable, pointHistoryTable);
+
+    }
 
     /**
      * 유저가 포인트 이용 시 잔고가 부족한 경우 금액 이용이 되지 않는지를 검증하기 위함
