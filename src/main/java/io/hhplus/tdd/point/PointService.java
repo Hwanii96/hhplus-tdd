@@ -57,7 +57,10 @@ public class PointService {
 
         long curUsrPoint = currentUserPoint.point();
 
-        if(Long.MAX_VALUE < curUsrPoint + amount) {
+        // Long.MAX_VALUE < curUsrPoint + amount
+        // Long.MAX_VALUE - curUsrPoint < amount
+        // amount > Long.MAX_VALUE - curUsrPoint
+        if(Long.MAX_VALUE - amount < curUsrPoint) {
             throw new IllegalArgumentException("충전 후 포인트는 표현 가능한 최대값을 초과할 수 없습니다.");
         }
 

@@ -21,7 +21,6 @@ class PointServiceTest {
     /**
      * 잘못된 형식의 유저 ID로 포인트를 조회할 때 예외처리가 정상적으로 수행되는지를 검증하기 위함
      * 이건 ControllerTest에서 수행해야할듯 ?
-     * 예외처리를 받는 쪽이 Controller 쪽 이므로 ?
      */
     /*
     @Test
@@ -147,13 +146,13 @@ class PointServiceTest {
         long zeroAmount = 0L;
         long negativeNumberAmount = -1L;
 
-       IllegalArgumentException zeroException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, zeroAmount));
-       assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", zeroException.getMessage());
+        IllegalArgumentException zeroException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, zeroAmount));
+        assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", zeroException.getMessage());
 
-       IllegalArgumentException negativeNumberException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, negativeNumberAmount));
-       assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", negativeNumberException.getMessage());
+        IllegalArgumentException negativeNumberException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, negativeNumberAmount));
+        assertEquals("금액이 0보다 크지 않아 충전 또는 이용이 불가능합니다.", negativeNumberException.getMessage());
 
-       verifyNoInteractions(userPointTable, pointHistoryTable);
+        verifyNoInteractions(userPointTable, pointHistoryTable);
 
     }
 
@@ -165,6 +164,15 @@ class PointServiceTest {
     void 포인트_충전_시_허용_가능한_금액을_초과한_경우() {
 
         long id = 6L;
+        long amount = Long.MAX_VALUE;
+
+        when(userPointTable.selectById(id)).thenReturn(new UserPoint(id, 777L, System.currentTimeMillis()));
+
+        IllegalArgumentException maxValueException = assertThrows(IllegalArgumentException.class, () -> pointService.chargePoint(id, amount));
+        assertEquals("충전 후 포인트는 표현 가능한 최대값을 초과할 수 없습니다.", maxValueException.getMessage());
+
+        verify(userPointTable).selectById(id);
+        verifyNoInteractions(pointHistoryTable);
 
     }
 
@@ -215,6 +223,22 @@ class PointServiceTest {
     /**
      * 유저가 포인트 이용 시 잔고가 부족한 경우 금액 이용이 되지 않는지를 검증하기 위함
      */
+    @Test
+    @DisplayName("포인트 이용 시 잔고가 부족한 경우 예외 검증")
+    void 포인트_이용_시_잔고가_부족한_경우() {
+
+        long id = 9L;
+        long amount = 7777L;
+
+        when(userPointTable.selectById(id)).thenReturn(UserPoint.empty(id));
+
+        InsufficientPointException insufficientPointException = assertThrows(InsufficientPointException.class, () -> pointService.usePoint(id, amount));
+        assertEquals("잔고가 충분하지 않아 포인트 이용이 불가능합니다.", insufficientPointException.getMessage());
+
+        verify(userPointTable).selectById(id);
+        verifyNoInteractions(pointHistoryTable);
+
+    }
 
     /**
      * 유저가 포인트 이용 시 정상적으로 사용되는지를 검증하기 위함
@@ -234,7 +258,7 @@ class PointServiceTest {
         assertEquals(70000L, resultUserPoint.point());
 
         verify(userPointTable).selectById(id);
-        verify(userPointTable).insertOrUpdate(id, amount);
+        verify(userPointTable).insertOrUpdate(id, 70000L);
         verify(pointHistoryTable.insert(id, amount, TransactionType.USE, System.currentTimeMillis()));
 
     }
