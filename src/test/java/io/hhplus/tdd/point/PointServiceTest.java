@@ -27,7 +27,7 @@ class PointServiceTest {
     @DisplayName("유저 ID가 Long Type의 데이터가 아닌 경우 예외 반환")
     void 잘못된_유저_ID로_포인트_조회_시_예외_반환() {
 
-        String id = "testId001";
+        String id = "test01";
 
         when(userPointTable.selectById(id)).thenReturn();
 
