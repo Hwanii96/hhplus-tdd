@@ -135,16 +135,6 @@ class PointControllerTest {
         verify(pointService).chargePoint(id,77777);
 
     }
-
-    /**
-     * 특정 유저가 포인트 충전 시 허용 가능한 금액을 초과한 경우
-     * 유저의 충전 금액이 허용 가능한 금액을 초과하는 경우 예외 처리 검증
-     */
-    @Test
-    @DisplayName("")
-    void 특정_유저가_포인트_충전_시_허용_가능한_금액을_초과한_경우() throws Exception {
-
-    }
     
     /**
      * 특정 유저의 포인트 이용
@@ -155,7 +145,7 @@ class PointControllerTest {
     void 특정_유저의_포인트_이용() throws Exception {
 
         long id = 5L;
-        long forTestCurTime = System.currentTimeMillis();
+        // long forTestCurTime = System.currentTimeMillis();
 
         when(pointService.usePoint(id, 777)).thenReturn(UserPoint.empty(id));
 
@@ -178,8 +168,21 @@ class PointControllerTest {
      * 유저가 보유한 금액이 부족한 경우 예외 처리 검증
      */
     @Test
-    @DisplayName("")
+    @DisplayName("PATCH /point/{id}/use")
     void 특정_유저가_포인트_이용_시_금액이_부족한_경우() throws Exception {
+
+        long id = 6L;
+
+        when(pointService.usePoint(id, 77777)).thenThrow(new InsufficientPointException("잔고가 충분하지 않아 포인트 사용이 불가능합니다."));
+
+        mockMvc.perform(patch("/point/" + id + "/use")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("77777")
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.message").value("잔고가 충분하지 않아 포인트 사용이 불가능합니다."));
 
     }
 
