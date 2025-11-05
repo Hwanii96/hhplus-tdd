@@ -12,6 +12,12 @@ public class PointController {
 
     private static final Logger log = LoggerFactory.getLogger(PointController.class);
 
+    private final PointService pointService;
+
+    public PointController(PointService pointService) {
+        this.pointService = pointService;
+    }
+
     /**
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
      */
@@ -19,8 +25,13 @@ public class PointController {
     public UserPoint point(
             @PathVariable long id
     ) {
-        return new UserPoint(0, 0, 0);
-    }
+        UserPoint userPoint = pointService.searchPoint(id);
+
+        return userPoint;
+
+        // return new UserPoint(0, 0, 0);
+
+    }  // point()
 
     /**
      * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
@@ -29,8 +40,13 @@ public class PointController {
     public List<PointHistory> history(
             @PathVariable long id
     ) {
-        return List.of();
-    }
+        List<PointHistory> pointHistoryList = pointService.searchHistoriesPoint(id);
+
+        return pointHistoryList;
+
+        // return List.of();
+
+    } // history()
 
     /**
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
@@ -40,8 +56,13 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) {
-        return new UserPoint(0, 0, 0);
-    }
+        UserPoint userPoint = pointService.chargePoint(id, amount);
+
+        return userPoint;
+
+        // return new UserPoint(0, 0, 0);
+
+    } // charge()
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
@@ -51,6 +72,12 @@ public class PointController {
             @PathVariable long id,
             @RequestBody long amount
     ) {
-        return new UserPoint(0, 0, 0);
-    }
-}
+        UserPoint userPoint = pointService.usePoint(id, amount);
+
+        return userPoint;
+
+        // return new UserPoint(0, 0, 0);
+
+    } // use()
+
+} // PointController
